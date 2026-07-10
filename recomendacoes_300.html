@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>300 Recomendações</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #0a0a0f; color: #e0e0e0; }
+        .song-card { background: #141419; border: 1px solid #222; border-radius: 10px; transition: all .15s; }
+        .song-card:hover { border-color: #333; background: #1a1a25; }
+        .song-card.removed { display: none; }
+        .song-card a { color: #0d6efd; text-decoration: none; flex: 1; padding: 12px 14px; font-size: 14px; }
+        .song-card a::before { content: "▶ "; color: #dc3545; }
+        .btn-remove { background: none; border: none; color: #555; cursor: pointer; padding: 12px 16px; font-size: 18px; line-height: 1; border-radius: 0 10px 10px 0; }
+        .btn-remove:hover { color: #dc3545; background: rgba(220,53,69,0.1); }
+        .section-title { font-size: 17px; font-weight: 600; padding: 8px 0 8px 12px; border-bottom: 1px solid #222; margin: 28px 0 12px; }
+        .text-muted-custom { color: #888; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0f; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container py-3 px-3 px-sm-4" style="max-width:960px">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <div>
+                <h1 class="h4 mb-0" style="color:#0d6efd">300 Recomendações</h1>
+                <small class="text-muted-custom" id="counter"></small>
+            </div>
+            <button class="btn btn-outline-secondary btn-sm border-secondary text-secondary" id="resetBtn">
+                ↻ Restaurar removidas
+            </button>
+        </div>
+
+        <div id="playlist"></div>
+
+        <p class="text-center text-muted-custom small mt-4 mb-2">
+            Baseado nas suas 2230 músicas &mdash; clique no <span class="text-danger">✕</span> para remover
+        </p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const STORAGE_KEY = 'recom_300_removidas';
+
+        function getRemovidas() {
+            try { return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')); }
+            catch { return new Set(); }
+        }
+
+        function saveRemovidas(set) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
+        }
+
+        function updateCounter(total, visiveis) {
+            document.getElementById('counter').textContent = visiveis + ' de ' + total + ' musicas';
+        }
+
+        const sections = [
+            { title: 'ROCK / METAL (45)', color: '#dc3545', songs: [
+                'Spiritbox - Circle With Me',
+                'Sleep Token - Alkaline',
+                'Bad Omens - Just Pretend',
+                'Bring Me The Horizon - Drown',
+                'I Prevail - Breaking Down',
+                'Motionless In White - Another Life',
+                'Architects - Animals',
+                'Dayseeker - Sleeptalk',
+                'The Plot In You - Feel Nothing',
+                'Beartooth - Hated',
+                'Currents - Better Days',
+                'Invent Animate - The Sun Slept',
+                'Northlane - Quantum Flux',
+                'Polaris - The Remedy',
+                'Erra - Snowblood',
+                'Make Them Suffer - Erase Me',
+                'While She Sleeps - Silence Speaks',
+                'Thornhill - Coven',
+                'Loathe - Is It Really You?',
+                'Deftones - Rosemary',
+                'Korn - Rotting in Vain',
+                'Slipknot - The Devil in I',
+                'System Of A Down - Lonely Day',
+                'Tool - Schism',
+                'Rage Against The Machine - Bulls on Parade',
+                'Alice In Chains - Check My Brain',
+                'Soundgarden - Fell On Black Days',
+                'Pearl Jam - Black',
+                'Foo Fighters - The Pretender',
+                'Muse - Hysteria',
+                'Royal Blood - Figure It Out',
+                'Cleopatrick - Youth',
+                'Highly Suspect - My Name Is Human',
+                'Badflower - Ghost',
+                'Nothing But Thieves - Sorry',
+                'Ghost - Cirice',
+                'Sabaton - Primo Victoria',
+                'Volbeat - Still Counting',
+                'Disturbed - The Sound of Silence',
+                'Breaking Benjamin - So Cold',
+                'Three Days Grace - Pain',
+                'Shinedown - 45',
+                'Seether - Broken',
+                'Starset - My Demons',
+                'Crown The Empire - Blame It on the Pain'
+            ]},
+            { title: 'RAP AMERICANO (45)', color: '#0d6efd', songs: [
+                'Kendrick Lamar - DNA',
+                'JID - Sistanem',
+                'Baby Keem - Trademark USA',
+                'Metro Boomin - Superhero',
+                'Don Toliver - No Idea',
+                'Lil Baby - The Bigger Picture',
+                '21 Savage - Bank Account',
+                'Roddy Ricch - The Box',
+                'Lil Durk - All Love',
+                'Moneybagg Yo - Said Sum',
+                'Sleepy Hallow - Deep End',
+                'Fivio Foreign - Big Drip',
+                'Pop Smoke - Welcome to the Party',
+                'Westside Gunn - The Butcher and The Blade',
+                'Benny The Butcher - Crowns for Kings',
+                'Conway The Machine - Scatter Brain',
+                'Nipsey Hussle - Hussle & Motivate',
+                'YG - Still Brazy',
+                'Tyga - Ayy Macarena',
+                'Lil Wayne - A Milli',
+                'Rick Ross - Hustlin',
+                'Meek Mill - Going Bad',
+                '2 Chainz - It\'s a Vibe',
+                'BIA - Best On Earth',
+                'Denzel Curry - Walkin',
+                'Tyler The Creator - New Magic Wand',
+                'A$AP Rocky - Praise Da Lord',
+                'Mobb Deep - Shook Ones Pt II',
+                'Nas - Ether',
+                'Jay-Z - Dead Presidents II',
+                'The Notorious B.I.G. - Hypnotize',
+                'Wu-Tang Clan - C.R.E.A.M.',
+                'Dr. Dre - Still Dre',
+                'Snoop Dogg - Gin And Juice',
+                'Ice Cube - It Was a Good Day',
+                'Travis Scott - SICKO MODE',
+                'Future - Mask Off',
+                'Young Thug - Hot',
+                'Gunna - Drip Too Hard',
+                'Playboi Carti - R.I.P.',
+                'Drake - God\'s Plan',
+                'Kanye West - Stronger',
+                'J. Cole - Middle Child',
+                'Mac Miller - Self Care',
+                'Juice WRLD - Lucid Dreams'
+            ]},
+            { title: 'TRAP / NEW RAP (20)', color: '#20c997', songs: [
+                'Yeat - Talk',
+                'Ken Carson - Freestyle 2',
+                'Destroy Lonely - if looks could kill',
+                'Playboi Carti - Stop Breathing',
+                'Trippie Redd - Miss The Rage',
+                '$NOT - Gone',
+                'Lucki - Freewave',
+                'Yung Lean - Red Bottom Sky',
+                'Bladee - I Think',
+                'Lil Uzi Vert - XO TOUR Llif3',
+                'Future - Blow a Bag',
+                'Lil Nas X - MONTERO',
+                'Ski Mask Slump God - Faucet Failure',
+                'Jack Harlow - WHATS POPPIN',
+                'Polo G - RAPSTAR',
+                'Pop Smoke - For The Night',
+                'A Boogie - Drowning',
+                'Nav - Myself',
+                'Lil Keed - Snake',
+                'Sheck Wes - Muddy'
+            ]},
+            { title: 'RAP BRASIL (40)', color: '#198754', songs: [
+                'Veigh - Engorilou',
+                'KayBlack - Meca',
+                'Chefin - Adrenalina',
+                'Tz da Coronel - Invejoso',
+                'Oruam - Devaneio',
+                'Borges - Fogo no Bar',
+                'Leviano - Perto de Mim',
+                'MC GP - Brilho no Olhar',
+                'Ryu The Runner - Contagem',
+                'Caio Luccas - Mundo',
+                'WCnoBEAT - Fenda',
+                'Prodígio - Sucesso',
+                'Lil Kid - Marra',
+                'UBaby - Noite',
+                'Bvga Beatz - Ritmo',
+                'Hungria Hip Hop - Cheio de Marra',
+                'Filipe Ret - Good Vibe',
+                'Matuê - Quer Voar',
+                'Xamã - Malvadão 3',
+                'Djonga - Olho no Gato',
+                'BK\' - O Fim',
+                'Major RD - Bonde da Rock',
+                'Froid - Kyoto',
+                'Sant - Saudade',
+                'Costa Gold - Ndbs',
+                'L7NNON - Perdição',
+                'Mc Cabelinho - Ele é Superior',
+                'Orochi - Foco',
+                'PL Quest - Intenção',
+                'Mc Poze do Rodo - Me Sinto Abençoado',
+                'Teto - Mó Paz',
+                'WIU - Milhões',
+                'Dfideliz - Preto Rico',
+                'Pk - Estrela',
+                'Delacruz - Sua Vez',
+                'Cynthia Luz - 24 Horas',
+                'Racionais Mc\'s - Mil Trutas',
+                'Emicida - Passarinhos',
+                'Marcelo D2 - A Maldição',
+                'Baco Exu do Blues - 20 Ligações'
+            ]},
+            { title: 'POP MUNDIAL (35)', color: '#fd7e14', songs: [
+                'Chappell Roan - Pink Pony Club',
+                'Sabrina Carpenter - Nonsense',
+                'Ariana Grande - Into You',
+                'Dua Lipa - Physical',
+                'Billie Eilish - Happier Than Ever',
+                'Olivia Rodrigo - Good 4 U',
+                'Taylor Swift - Anti-Hero',
+                'Lady Gaga - Rain On Me',
+                'The Weeknd - Save Your Tears',
+                'Bruno Mars - Leave The Door Open',
+                'Glass Animals - Life Itself',
+                'D4vd - Here With Me',
+                'Steve Lacy - Sunshine',
+                'SZA - Good Days',
+                'Tyla - Truth or Dare',
+                'Charli XCX - Von Dutch',
+                'Troye Sivan - Rush',
+                'Miley Cyrus - Midnight Sky',
+                'Demi Lovato - Sorry Not Sorry',
+                'Camila Cabello - Never Be The Same',
+                'Shawn Mendes - In My Blood',
+                'Justin Bieber - Peaches',
+                'Ed Sheeran - Bad Habits',
+                'Harry Styles - As It Was',
+                'Lizzo - About Damn Time',
+                'Doja Cat - Say So',
+                'Rihanna - We Found Love',
+                'Katy Perry - Dark Horse',
+                'Beyoncé - Crazy In Love',
+                'Lady Gaga - Born This Way',
+                'Coldplay - Adventure of a Lifetime',
+                'OneRepublic - Rescue Me',
+                'Maroon 5 - Sugar',
+                'The Chainsmokers - Something Just Like This',
+                'Rita Ora - Anywhere'
+            ]},
+            { title: 'ELETRÔNICA / PHONK (35)', color: '#ffc107', songs: [
+                'Skrillex - Scary Monsters',
+                'Knife Party - Boss Mode',
+                'Pegboard Nerds - Disconnected',
+                'Alan Walker - On My Way',
+                'David Guetta - Titanium',
+                'Calvin Harris - Sweet Nothing',
+                'Martin Garrix - Scared To Be Lonely',
+                'Avicii - The Nights',
+                'Kygo - Firestone',
+                'Flume - Never Be Like You',
+                'ODESZA - Say My Name',
+                'Illenium - Feel Good',
+                'Excision - Die For You',
+                'KSHMR - Secrets',
+                'Dimitri Vegas - Mammoth',
+                'W&W - Lift Off',
+                'Don Diablo - Cutting Shapes',
+                'Oliver Heldens - Gecko',
+                'Tchami - Promesses',
+                'DJ Snake - Middle',
+                'Major Lazer - Bubble Butt',
+                'Diplo - Wish',
+                'KURA - Corvo',
+                'Alok - Hear Me Now',
+                'Vintage Culture - In The Dark',
+                'S3RL - MTC',
+                'KORDHELL - MURDER IN MY MIND',
+                'DVRST - IMY',
+                'INTERWORLD - RAGING',
+                'NXSTY - Side Effectz',
+                'HXICIDE - I Fell',
+                'PHONK WALK - Slaughter',
+                'TOKYOSLEEP - MONTAGEM CORAL 2',
+                'MC ORSEN - Montagem 2',
+                'PRXSXNT FXTURE - VENOM'
+            ]},
+            { title: 'REGGAE / POP BR (15)', color: '#6f42c1', songs: [
+                'Natiruts - Quero Ser Feliz Também',
+                'Planta & Raiz - Eu Tô na Paz',
+                'Cidade Negra - Onde Você Mora',
+                'Mato Seco - Vou Deixar',
+                'Chimarruts - Pensamento',
+                'Maneva - Tão Simples',
+                'Projetaê - Teu Segredo',
+                'Onze:20 - Meu Lugar',
+                'Lagum - É Tarde',
+                'Nando Reis - Relicário',
+                'Tribalistas - Já Sei Namorar',
+                'Marcelo D2 - Desabafo',
+                'Seu Jorge - Mina do Condomínio',
+                'Criolo - Coco pra Cá',
+                'Céu - Laranja'
+            ]},
+            { title: 'MPB (35)', color: '#e83e8c', songs: [
+                'Caetano Veloso - Você é Linda',
+                'Gilberto Gil - Esotérico',
+                'Chico Buarque - Apesar de Você',
+                'Maria Bethânia - Explode Coração',
+                'Gal Costa - Chuva de Prata',
+                'Milton Nascimento - Maria Maria',
+                'Djavan - Meu Bem Querer',
+                'Elis Regina - Águas de Março',
+                'Rita Lee - Ovelha Negra',
+                'Cássia Eller - O Segundo Sol',
+                'Marisa Monte - Carnalismo',
+                'Lulu Santos - De Repente California',
+                'Frejat - Amor Pra Recomeçar',
+                'Tiago Iorc - Coisa Linda',
+                'O Rappa - O Que Sobrou do Céu',
+                'Skank - Jackie Tequila',
+                'Engenheiros do Hawaii - O Papa É Pop',
+                'Capital Inicial - Natasha',
+                'Os Paralamas do Sucesso - O Beco',
+                'Legião Urbana - Índios',
+                'Titãs - Flores',
+                'Barão Vermelho - Down Em Mim',
+                'Natiruts - Presente de Um Beija-Flor',
+                'Armandinho - Semente',
+                'Maneva - Só Pra Você Lembrar',
+                'Vitor Kley - Primavera',
+                'Liniker - Sem Nome Mas Com Endereço',
+                'Ana Vilela - Trem Bala',
+                'Jota Quest - Sempre Assim',
+                'Zeca Pagodinho - Deixa Acontecer',
+                'Paulinho da Viola - Coração Leviano',
+                'Arlindo Cruz - Um Cabra de Futuro',
+                'Péricles - Mesmo Sem Estar',
+                'Turma do Pagode - Amor Sem Fim',
+                'Grupo Revelação - Está Escrito'
+            ]},
+            { title: 'GOSPEL / WORSHIP (15)', color: '#2ecc71', songs: [
+                'Gabriela Rocha - Meus Olhos Em Ti',
+                'Aline Barros - Renova-Me',
+                'Ministério Zoe - Tudo Que Há Em Mim',
+                'Fernandinho - Faz Chover',
+                'Preto No Branco - Jesus Sem Fim',
+                'Nívea Soares - Teu Toque',
+                'Davi Sacer - No Caminho do Milagre',
+                'Anderson Freire - Deus de Promessas',
+                'Eliã Oliveira - O Milagre',
+                'Bruna Karla - Aviva-nos',
+                'Thalles Roberto - Seu Amor',
+                'Ludmila Ferber - Que Se Abram Os Céus',
+                'Damares - Adorador',
+                'Aline Barros - Sonda-me',
+                'Gabriela Rocha - Deus é Deus'
+            ]},
+            { title: 'NBA / BASQUETE (8)', color: '#e67e22', songs: [
+                'Meek Mill - Championships',
+                'Pusha T - Basketball',
+                'Rick Ross - By Any Means',
+                'The Game - Hate It Or Love It',
+                'Nipsey Hussle - Dedication',
+                'Drake - Tuscan Leather',
+                'Puff Daddy - Victory',
+                'Fat Joe - All The Way Up'
+            ]},
+            { title: 'GAME / SOUNDTRACK (7)', color: '#1abc9c', songs: [
+                'Hans Zimmer - Time (Inception)',
+                'Jeremy Soule - Dragonborn (Skyrim)',
+                'Mick Gordon - The Only Thing They Fear Is You',
+                'Lorn - Acid Rain',
+                'Berserk - Guts Theme',
+                'Gustavo Santaolalla - The Last of Us Theme',
+                'Trent Reznor - In Motion'
+            ]}
+        ];
+
+        const container = document.getElementById('playlist');
+        let total = 0;
+        sections.forEach(section => {
+            let html = `<div class="section-title" style="border-left:4px solid ${section.color};color:${section.color}">${section.title}</div><div class="row g-2">`;
+            section.songs.forEach(song => {
+                const id = 's-' + total++;
+                const q = encodeURIComponent(song + ' official');
+                html += `<div class="col-12 col-sm-6 col-lg-4"><div class="song-card d-flex align-items-center" id="${id}">`;
+                html += `<a href="https://www.youtube.com/results?search_query=${q}" target="_blank">${song}</a>`;
+                html += `<button class="btn-remove" data-id="${id}" title="Remover">✕</button></div></div>`;
+            });
+            html += '</div>';
+            container.insertAdjacentHTML('beforeend', html);
+        });
+
+        const removidas = getRemovidas();
+        let visiveis = total;
+
+        document.querySelectorAll('.song-card').forEach(w => {
+            if (removidas.has(w.id)) {
+                w.classList.add('removed');
+                visiveis--;
+            }
+        });
+        updateCounter(total, visiveis);
+
+        container.addEventListener('click', e => {
+            const btn = e.target.closest('.btn-remove');
+            if (!btn) return;
+            const wrapper = document.getElementById(btn.dataset.id);
+            if (!wrapper || wrapper.classList.contains('removed')) return;
+            wrapper.classList.add('removed');
+            const set = getRemovidas();
+            set.add(wrapper.id);
+            saveRemovidas(set);
+            visiveis--;
+            updateCounter(total, visiveis);
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            localStorage.removeItem(STORAGE_KEY);
+            document.querySelectorAll('.song-card.removed').forEach(w => {
+                w.classList.remove('removed');
+                visiveis++;
+            });
+            updateCounter(total, visiveis);
+        });
+    </script>
+</body>
+</html>
