@@ -9,7 +9,7 @@
         body { background: #0a0a0f; color: #e0e0e0; }
         .song-card { background: #141419; border: 1px solid #222; border-radius: 10px; transition: all .15s; }
         .song-card:hover { border-color: #333; background: #1a1a25; }
-        .song-card.removed { display: none; }
+        .removed { display: none !important; }
         .song-card a { color: #0d6efd; text-decoration: none; flex: 1; padding: 12px 14px; font-size: 14px; }
         .song-card a::before { content: "▶ "; color: #dc3545; }
         .btn-remove { background: none; border: none; color: #555; cursor: pointer; padding: 14px 20px; font-size: 22px; line-height: 1; border-radius: 0 10px 10px 0; min-width: 48px; min-height: 48px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(220,53,69,0.2); }
@@ -411,17 +411,21 @@
         document.querySelectorAll('.song-card').forEach(w => {
             if (removidas.has(w.id)) {
                 w.classList.add('removed');
+                const col = w.closest('.col-12');
+                if (col) col.classList.add('removed');
                 visiveis--;
             }
         });
         updateCounter(total, visiveis);
 
         function removerMusica(btn) {
-            const wrapper = document.getElementById(btn.dataset.id);
-            if (!wrapper || wrapper.classList.contains('removed')) return;
-            wrapper.classList.add('removed');
+            const card = document.getElementById(btn.dataset.id);
+            if (!card || card.classList.contains('removed')) return;
+            const col = card.closest('.col-12');
+            if (col) col.classList.add('removed');
+            card.classList.add('removed');
             const set = getRemovidas();
-            set.add(wrapper.id);
+            set.add(card.id);
             saveRemovidas(set);
             visiveis--;
             updateCounter(total, visiveis);
@@ -441,6 +445,8 @@
             localStorage.removeItem(STORAGE_KEY);
             document.querySelectorAll('.song-card.removed').forEach(w => {
                 w.classList.remove('removed');
+                const col = w.closest('.col-12');
+                if (col) col.classList.remove('removed');
                 visiveis++;
             });
             updateCounter(total, visiveis);
